@@ -16,7 +16,13 @@
 			border: 1px solid #444;
 			image-rendering: pixelated;
 			display: block;
-			margin-bottom: 20px;
+			margin-bottom: 220px;
+		}
+
+		/* Scale secondary canvas ×4 */
+		#secondaryCanvas {
+			transform: scale(4);
+			transform-origin: top left;
 		}
 
 		.panel {
@@ -169,9 +175,10 @@
 	For each of your Runes (including black), enter the X and Y coordinate of the pixel, along with the color, and press
 	"Submit"<br>
 
-	<canvas id="pixelCanvas" width="777" height="77"></canvas>
-	Secondary Canvas, assuming the coordinates are octal instead of decimal
-	<canvas id="secondaryCanvas" width="511" height="63"></canvas>
+	<!-- PRIMARY CANVAS REMOVED -->
+	<!-- <canvas id="pixelCanvas" width="777" height="77"></canvas> -->
+	<sub>Note : Coordinates are interpreted as octal for rendering purposes </sub>
+	<canvas id="secondaryCanvas" width="128" height="64"></canvas>
 
 	<div class="panel">
 		<label>Color (If you are unsure, a reference chart is available below):</label>
@@ -203,13 +210,14 @@
 		<button id="submitBtn">Submit Pixel</button>
 		<span id="statusMessageField">Submit Status</span>
 	</div>
-	<!-- Added a little keypad so people can just click the runes instead of manually translating-->
+
 	<script>
 		function onRunePress(num) {
 			const input = document.getElementById("rune-keypad-number");
 			input.value += num;
 		}
 	</script>
+
 	<br>
 	If you don't want to translate the runes to numbers yourself, you can use the Rune Keypad™ below:
 	<div class="keaypad-wrapper">
@@ -231,13 +239,14 @@
 	Color Chart Reference : <br>
 	<img src="./img/colorRef.png" width="500px" height="300px">
 	<br>
-	<!-- Supabase JS -->
+
 	<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.34.0/dist/umd/supabase.min.js"></script>
 	<script>
 		const W = 777, H = 77;
-		const canvas = document.getElementById("pixelCanvas");
-		const ctx = canvas.getContext("2d");
 
+		/* PRIMARY CANVAS REMOVED */
+		// const canvas = document.getElementById("pixelCanvas");
+		// const ctx = canvas.getContext("2d");
 
 		const secondaryCanvas = document.getElementById("secondaryCanvas");
 		const sctx = secondaryCanvas.getContext("2d");
@@ -250,98 +259,67 @@
 		const statusMessageField = document.getElementById("statusMessageField");
 
 
-		// Fill grey background
-		ctx.fillStyle = "#808080";
-		ctx.fillRect(0, 0, W, H);
-
+		// Secondary canvas background
 		sctx.fillStyle = "#808080";
 		sctx.fillRect(0, 0, W, H);
 
-		// Show initial color
+		// Color preview
 		colorPreview.style.backgroundColor = colorSelect.value;
 		colorSelect.addEventListener('change', () => {
 			colorPreview.style.backgroundColor = colorSelect.value;
 		});
 
-		
+
 		// --- Supabase setup ---
 		const SUPABASE_URL = "https://uqsulkecdpzwacktcwut.supabase.co";
 		const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxc3Vsa2VjZHB6d2Fja3Rjd3V0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQwOTgxMjEsImV4cCI6MjA3OTY3NDEyMX0.-4safUVuOJayX_D15q1GmPYiHVSzIW2Zmc833o303W8";
 		const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-		
-		
-		// Load all pixels from Supabase
-		async function loadPixels() {
-		const { data, error } = await supabaseClient.from("pixels").select("*");
-		if(error){ console.error(error); return; }
-		data.forEach(p => {
-		ctx.fillStyle = p.color;
-		ctx.fillRect(p.x, p.y, 1, 1);
-		});
-		}
-		loadPixels();
-		
-		// Secondary canvas: pull pixels, octal -> decimal, draw
+
+
+		// Secondary canvas loader
 		async function loadSecondaryCanvas() {
 			const { data, error } = await supabaseClient.from("pixels").select("*");
-			if(error){ console.error(error); return; }
+			if (error) { console.error(error); return; }
+
 			data.forEach(p => {
-				// Convert X/Y from octal string to decimal if stored as octal strings
 				const xDec = parseInt(p.x, 8);
 				const yDec = parseInt(p.y, 8);
-				// Validate bounds
-				if(isNaN(xDec) || isNaN(yDec) || xDec<0||xDec>=W||yDec<0||yDec>=H) return;
+				if (isNaN(xDec) || isNaN(yDec) || xDec < 0 || xDec >= W || yDec < 0 || yDec >= H) return;
 				sctx.fillStyle = p.color;
 				sctx.fillRect(xDec, yDec, 1, 1);
 			});
 		}
 		loadSecondaryCanvas();
-		
-		// Submit a pixel using RLS-compatible upsert
+
+
+		// Submit (still writes to DB)
 		submitBtn.onclick = async () => {
-		const x = parseInt(xInput.value);
-		const y = parseInt(yInput.value);
-		const color = colorSelect.value;
-		
-		
-		if(isNaN(x) || isNaN(y) || x<0||x>=W||y<0||y>=H){
-		alert("Invalid coordinates");
-		return;
-		}
-		
-		
-		ctx.fillStyle = color;
-		ctx.fillRect(x, y, 1, 1);
-		
-		
-		// Upsert requires (x,y) as primary key in the table
-		const { data, error, status} = await supabaseClient
-		.from("pixels")
-		.upsert({ x, y, color }, { onConflict: ['x','y'] });
-		
-		if (status === 200 || status === 201) {
-			statusMessageField.textContent = `Pixel at (${x}, ${y}) submitted successfully!`;
-			statusMessageField.className = "good";
-		} else if ( status === 409 ) {
-			statusMessageField.textContent = `Pixel at (${x}, ${y}) already exists.`;
-			statusMessageField.className = "fine";
-		} else {
-			statusMessageField.textContent = `Error submitting pixel: ${status}`;
-			statusMessageField.className = "bad";
-		}
-		
-		if(error) console.error("Supabase upsert error:", error);
+			const x = parseInt(xInput.value);
+			const y = parseInt(yInput.value);
+			const color = colorSelect.value;
+
+			if (isNaN(x) || isNaN(y) || x < 0 || x >= W || y < 0 || y >= H) {
+				alert("Invalid coordinates");
+				return;
+			}
+
+			const { data, error, status } = await supabaseClient
+				.from("pixels")
+				.upsert({ x, y, color }, { onConflict: ['x', 'y'] });
+
+			if (status === 200 || status === 201) {
+				statusMessageField.textContent = `Pixel at (${x}, ${y}) submitted successfully!`;
+				statusMessageField.className = "good";
+			} else if (status === 409) {
+				statusMessageField.textContent = `Pixel at (${x}, ${y}) already exists.`;
+				statusMessageField.className = "fine";
+			} else {
+				statusMessageField.textContent = `Error submitting pixel: ${status}`;
+				statusMessageField.className = "bad";
+			}
+
+			if (error) console.error("Supabase upsert error:", error);
 		};
-		
-		
-		// Optional: subscribe to realtime updates (requires Realtime enabled on table)
-		supabaseClient.channel('realtime-pixels')
-		.on('postgres_changes', { event: '*', schema: 'public', table: 'pixels' }, payload => {
-		const p = payload.new;
-		ctx.fillStyle = p.color;
-		ctx.fillRect(p.x, p.y, 1, 1);
-		}).subscribe();
-		
 	</script>
 </body>
 
