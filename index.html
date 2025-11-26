@@ -41,14 +41,15 @@ For each of your colored Runes, enter the X and Y coordinate of the pixel, along
 <div class="color-container">
 <select id="colorSelect">
 <option value="#ff0000">Red</option>
-<option value="#0000ff">Blue</option>
-<option value="#00ff00">Green</option>
-<option value="#ff69b4">Pink</option>
+<option value="#A52A2A">Brown</option>
 <option value="#FFA500">Orange</option>
-<option value="##A52A2A">Brown</option>
-<option value="#800080">Purple</option>
-<option value="#ffffff">White</option>
 <option value="#ffff00">Yellow</option>
+<option value="#00ff00">Green</option>
+<option value="#0000ff">Blue</option>
+<option value="#800080">Purple</option>
+<option value="#000000">Black</option>
+<option value="#ffffff">White</option>
+
 </select>
 <span class="color-preview" id="colorPreview"></span>
 </div>
@@ -82,7 +83,7 @@ const submitBtn = document.getElementById("submitBtn");
 
 
 // Fill black background
-ctx.fillStyle = "#000";
+ctx.fillStyle = "#808080";
 ctx.fillRect(0,0,W,H);
 
 
