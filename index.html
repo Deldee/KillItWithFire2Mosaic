@@ -263,11 +263,18 @@
 		sctx.fillStyle = "#808080";
 		sctx.fillRect(0, 0, W, H);
 
-		// Color preview
-		colorPreview.style.backgroundColor = colorSelect.value;
-		colorSelect.addEventListener('change', () => {
-			colorPreview.style.backgroundColor = colorSelect.value;
-		});
+		// Show initial color
+        colorPreview.style.backgroundColor = colorSelect.value;
+
+        colorSelect.addEventListener('change', () => {
+            colorPreview.style.backgroundColor = colorSelect.value;
+        });
+
+        // INLINE LIVE UPDATE (added)
+        colorSelect.addEventListener("input", () => {
+            colorPreview.style.backgroundColor = colorSelect.value;
+        });
+
 
 
 		// --- Supabase setup ---
@@ -290,6 +297,7 @@
 			});
 		}
 		loadSecondaryCanvas();
+
 
 
 		// Submit (still writes to DB)
@@ -320,6 +328,17 @@
 
 			if (error) console.error("Supabase upsert error:", error);
 		};
+		
+		// Optional: subscribe to realtime updates (requires Realtime enabled on table)
+		supabaseClient.channel('realtime-pixels')
+		.on('postgres_changes', { event: '*', schema: 'public', table: 'pixels' }, payload => {
+			const p = payload.new;
+			sctx.fillStyle = p.color;
+			sctx.fillRect(p.x, p.y, 1, 1);
+		})
+		.subscribe();
+
+
 	</script>
 </body>
 
