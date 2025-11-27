@@ -170,7 +170,7 @@
     <h3>Step 2</h3>
     <ul>
       <li><span class="label">Heat:</span> 0</li>
-      <li><span class="label">Add:</span> golden trophy</li>
+      <li><span class="label">Add:</span> golden trophy (Requires finishing the game at least once)</li>
       <li><span class="label">Action:</span> Don’t stir</li>
     </ul>
   </div>
@@ -208,178 +208,15 @@
 	item<br>
 
 
-
-
 	<h2>Kill it With Fire 2 Mosaic</h2>
-	For each of your Runes (including black), enter the X and Y coordinate of the pixel, along with the color, and press
-	"Submit"<br>
+	This event has now been solved, below are the community's final mosaic, along with the full solution<br>
+	<h3>Community Solution</h3>
+	<img src="./img/CommunitySolution.png" width="500px" height="200px"><br>
+	<h3>Full Solution</h3>
+	<img style="background-color : grey;}" src="./img/FullSolution.png" width="500px" height="200px"><br>
 
-	<!-- PRIMARY CANVAS REMOVED -->
-	<!-- <canvas id="pixelCanvas" width="777" height="77"></canvas> -->
-	<sub>Note : Coordinates are interpreted as octal for rendering purposes </sub>
-	<canvas id="secondaryCanvas" width="128" height="64"></canvas>
+	
 
-	<div class="panel">
-		<label>Color (If you are unsure, a reference chart is available below):</label>
-		<div class="color-container">
-			<select id="colorSelect">
-				<option value="#ff0000">Red</option>
-				<option value="#FFC0CB">Pink</option>
-				<option value="#895129">Brown</option>
-				<option value="#FFA500">Orange</option>
-				<option value="#ffff00">Yellow</option>
-				<option value="#00ff00">Green</option>
-				<option value="#0000ff">Blue</option>
-				<option value="#800080">Purple</option>
-				<option value="#000000">Black</option>
-				<option value="#ffffff">White</option>
-
-			</select>
-			<span class="color-preview" id="colorPreview"></span>
-		</div>
-
-
-		<label for="xInput">X:</label>
-		<input id="xInput" type="number" min="0" max="776">
-
-
-		<label for="yInput">Y:</label>
-		<input id="yInput" type="number" min="0" max="76">
-
-
-		<button id="submitBtn">Submit Pixel</button>
-		<span id="statusMessageField">Submit Status</span>
-	</div>
-
-	<script>
-		function onRunePress(num) {
-			const input = document.getElementById("rune-keypad-number");
-			input.value += num;
-		}
-	</script>
-
-	<br>
-	If you don't want to translate the runes to numbers yourself, you can use the Rune Keypad™ below:
-	<div class="keaypad-wrapper">
-		<label for="rune-keypad-number">Rune Keypad™:</label>
-		<input type="number" name="rune-keypad-out" id="rune-keypad-number">
-		<div class="rune-keypad">
-			<button onclick="onRunePress(1)"><img src="./img/Rune1.png" alt="Rune 1"></button>
-			<button onclick="onRunePress(2)"><img src="./img/Rune2.png" alt="Rune 2"></button>
-			<button onclick="onRunePress(3)"><img src="./img/Rune3.png" alt="Rune 3"></button>
-			<button onclick="onRunePress(4)"><img src="./img/Rune4.png" alt="Rune 4"></button>
-			<button onclick="onRunePress(5)"><img src="./img/Rune5.png" alt="Rune 5"></button>
-			<button onclick="onRunePress(6)"><img src="./img/Rune6.png" alt="Rune 6"></button>
-			<button onclick="onRunePress(7)"><img src="./img/Rune7.png" alt="Rune 7"></button>
-			<button onclick="onRunePress(0)"><img src="./img/Rune0.png" alt="Rune 0"></button>
-			<button onclick="document.getElementById('rune-keypad-number').value = ''">Clear</button>
-		</div>
-	</div>
-	<br>
-	Color Chart Reference : <br>
-	<img src="./img/colorRef.png" width="500px" height="300px">
-	<br>
-
-	<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.34.0/dist/umd/supabase.min.js"></script>
-	<script>
-		const W = 777, H = 77;
-
-		/* PRIMARY CANVAS REMOVED */
-		// const canvas = document.getElementById("pixelCanvas");
-		// const ctx = canvas.getContext("2d");
-
-		const secondaryCanvas = document.getElementById("secondaryCanvas");
-		const sctx = secondaryCanvas.getContext("2d");
-
-		const colorSelect = document.getElementById("colorSelect");
-		const colorPreview = document.getElementById("colorPreview");
-		const xInput = document.getElementById("xInput");
-		const yInput = document.getElementById("yInput");
-		const submitBtn = document.getElementById("submitBtn");
-		const statusMessageField = document.getElementById("statusMessageField");
-
-
-		// Secondary canvas background
-		sctx.fillStyle = "#808080";
-		sctx.fillRect(0, 0, W, H);
-
-		// Show initial color
-        colorPreview.style.backgroundColor = colorSelect.value;
-
-        colorSelect.addEventListener('change', () => {
-            colorPreview.style.backgroundColor = colorSelect.value;
-        });
-
-        // INLINE LIVE UPDATE (added)
-        colorSelect.addEventListener("input", () => {
-            colorPreview.style.backgroundColor = colorSelect.value;
-        });
-
-
-
-		// --- Supabase setup ---
-		const SUPABASE_URL = "https://uqsulkecdpzwacktcwut.supabase.co";
-		const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxc3Vsa2VjZHB6d2Fja3Rjd3V0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQwOTgxMjEsImV4cCI6MjA3OTY3NDEyMX0.-4safUVuOJayX_D15q1GmPYiHVSzIW2Zmc833o303W8";
-		const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-
-		// Secondary canvas loader
-		async function loadSecondaryCanvas() {
-			const { data, error } = await supabaseClient.from("pixels").select("*");
-			if (error) { console.error(error); return; }
-
-			data.forEach(p => {
-				const xDec = parseInt(p.x, 8);
-				const yDec = parseInt(p.y, 8);
-				if (isNaN(xDec) || isNaN(yDec) || xDec < 0 || xDec >= W || yDec < 0 || yDec >= H) return;
-				sctx.fillStyle = p.color;
-				sctx.fillRect(xDec, yDec, 1, 1);
-			});
-		}
-		loadSecondaryCanvas();
-
-
-
-		// Submit (still writes to DB)
-		submitBtn.onclick = async () => {
-			const x = parseInt(xInput.value);
-			const y = parseInt(yInput.value);
-			const color = colorSelect.value;
-
-			if (isNaN(x) || isNaN(y) || x < 0 || x >= W || y < 0 || y >= H) {
-				alert("Invalid coordinates");
-				return;
-			}
-
-			const { data, error, status } = await supabaseClient
-				.from("pixels")
-				.upsert({ x, y, color }, { onConflict: ['x', 'y'] });
-
-			if (status === 200 || status === 201) {
-				statusMessageField.textContent = `Pixel at (${x}, ${y}) submitted successfully!`;
-				statusMessageField.className = "good";
-			} else if (status === 409) {
-				statusMessageField.textContent = `Pixel at (${x}, ${y}) already exists.`;
-				statusMessageField.className = "fine";
-			} else {
-				statusMessageField.textContent = `Error submitting pixel: ${status}`;
-				statusMessageField.className = "bad";
-			}
-
-			if (error) console.error("Supabase upsert error:", error);
-		};
-		
-		// Optional: subscribe to realtime updates (requires Realtime enabled on table)
-		supabaseClient.channel('realtime-pixels')
-		.on('postgres_changes', { event: '*', schema: 'public', table: 'pixels' }, payload => {
-			const p = payload.new;
-			sctx.fillStyle = p.color;
-			sctx.fillRect(p.x, p.y, 1, 1);
-		})
-		.subscribe();
-
-
-	</script>
 </body>
 
 </html>
